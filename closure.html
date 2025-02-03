@@ -11,19 +11,27 @@
 <script>
 function myCounter() {
   let counter = 0;
-  return function() {
-    counter++;
-    return counter;
+  //mycounter here returns 2 functions inc & reset
+  return {
+    increment: function() {
+      counter++;
+      return counter;
+    },
+    reset: function() {
+      counter = 0;
+    }
   };
 }
 
-const add = myCounter();
+const counterObj = myCounter();
+
 function myFunction(){
-  document.getElementById("demo").innerHTML = add();
+  document.getElementById("demo").innerHTML = counterObj.increment();
 }
 
 function resetcount(){
-  document.getElementById("demo").innerHTML=0;
+  counterObj.reset(); 
+  document.getElementById("demo").innerHTML = 0;
 }
 
 </script>
