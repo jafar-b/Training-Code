@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputTodo = document.getElementById("input-todo");
   const buttonTodo = document.getElementById("button-todo");
   const ulTodo = document.getElementById("ul-todo");
+  const deleteAll = document.getElementById("deleteAll");
 
   let editMode = false;
   let editElement = null;
@@ -22,8 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const createTodo = (task) => {
     const li = document.createElement("li");
-    li.className =
-      "list-group-item d-flex justify-content-between align-items-start";
+    li.className = "list-group-item d-flex justify-content-between align-items-start";
     li.innerHTML = `<span class="text-todo">${task}</span>
     <div class="btn-group" role="group" aria-label="Basic mixed styles example">
       <button type="button" class="btn btn-danger">Edit</button>
@@ -33,20 +33,34 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   ulTodo.addEventListener("click", (e) => {
+    const li = e.target.closest(".list-group-item");
+    if (!li) return;
+
     if (e.target.classList.contains("btn-warning")) {
-      e.target.closest(".list-group-item").remove();
+      li.remove();
       saveAllTodo();
     }
 
     if (e.target.classList.contains("btn-danger")) {
-      const li = e.target.closest(".list-group-item");
-      const taskText = li.querySelector(".text-todo").textContent;
-
-      inputTodo.value = taskText;
-      buttonTodo.textContent = "Update";
-
-      editElement = li;
-      editMode = true;
+      const taskText = li.querySelector(".text-todo");
+      if (e.target.textContent === "Edit") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "edit-text d-flex justify-content-between align-items-start";
+        input.value = taskText.textContent;
+        li.replaceChild(input, taskText);
+        e.target.textContent = "Set";
+      } else {
+        const input = li.querySelector(".edit-text");
+        if (!input) return;
+        const newText = input.value;
+        const span = document.createElement("span");
+        span.className = "text-todo";
+        span.textContent = newText;
+        li.replaceChild(span, input);
+        e.target.textContent = "Edit";
+        saveAllTodo();
+      }
     }
   });
 
@@ -54,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const allTodos = [...document.querySelectorAll(".text-todo")].map(
       (task) => task.textContent
     );
-
     localStorage.setItem("allTodos", JSON.stringify(allTodos));
   };
 
@@ -62,6 +75,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const allTodos = JSON.parse(localStorage.getItem("allTodos")) || [];
     allTodos.forEach((task) => createTodo(task));
   };
+
+  const deleteAllTodos = () => {
+    if (confirm("Do you really want to delete all Todos?")) {
+      localStorage.clear();
+      window.location.reload(true);
+    }
+  };
+  deleteAll.addEventListener("click", deleteAllTodos);
 
   loadAllTodo();
 });
